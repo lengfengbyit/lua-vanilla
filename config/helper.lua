@@ -20,14 +20,19 @@ end
 
 -- 日志记录
 function helper:log(str)
-    if str then
-        local filePath = './logs/debug.log'
-        if not logFile then
-          logFile = io.open(filePath, 'a')
-        end
 
-        logFile:write(str .. '\n')
-    end
+  if type(str) == 'table' then
+    str = self:dumpTab(str)
+  end
+
+  if str then
+      local filePath = './logs/debug.log'
+      if not logFile then
+        logFile = io.open(filePath, 'a')
+      end
+
+      logFile:write(str .. '\n')
+  end
 end
 
 -- 关闭日志文件指针
@@ -147,6 +152,25 @@ function helper:getAllCookie()
     if tab ~= nil then result[tab[1]] = tab[2] end
   end
   return result
+end
+
+-- 删除cookie，key可以是单个键，
+-- 也可以是多个键，多个键放在数组里
+-- 如果没有指定key，则默认删除所有cookie
+function helper:delCookie( key )
+
+  self:log(type(key))
+  local cookie = {};
+  if type(key) == 'table' then
+    for i,v in ipairs(key) do
+      cookie[v] = '';
+    end
+    key = cookie;
+  elseif type(key) == 'nil' then
+    key = self:getAllCookie()
+  end
+
+  self:setCookie(key, '', -1);
 end
 
 -- 字符串分隔

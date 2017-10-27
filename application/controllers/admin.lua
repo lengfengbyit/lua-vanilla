@@ -3,6 +3,10 @@ local helper = require('config.helper')
 
 --显示登录页面
 function AdminController:login()
+
+    -- 如果已经登录，则跳转到index页面
+    if self:isLogin() then ngx.exec('/admin/index') end
+
     local view = self:getView()
 
     -- 获得当前请求方法
@@ -22,6 +26,10 @@ function AdminController:login()
         args = ngx.req.get_post_args()
 
         if args['userName'] == 'admin' and args['password'] == 'admin123' then
+            helper:setCookie(
+                {username = args['userName'], pwd = args['password']},
+                nil, 3600
+            );
             helper:log('登录成功');
             ngx.exec('/admin/index');
         else
@@ -35,15 +43,25 @@ function AdminController:login()
     return view:display()
 end
 
---控制台页面
-function AdminController:index()
-    local view = self:getView()
-    helper:log('后台首页');
+-- 注销登录
+function AdminController:logout()
 
+end
+
+-- 后台框架页面
+function AdminController:index()
+
+    -- 没有登录则跳转到登录页面
+    if not self:isLogin() then
+        helper:log('this is index')
+        ngx.exec('/admin/login');
+    end
+
+    local view = self:getView()
     return view:display()
 end
 
-
+-- 控制台页面
 function AdminController:main()
 
     local view = self:getView()
@@ -58,28 +76,17 @@ function AdminController:video()
     return view:display()
 end
 
-function AdminController:test()
+-- 检查用户是否登录
+function AdminController:isLogin()
+    local cookie = require('resty.cookie'):new();
+    local username = cookie:get('username');
+    local pwd = cookie:get('pwd');
 
-    return helper:dumpTab(helper:getAllCookie())
+    if username == 'admin' and pwd == 'admin123' then
+        return true;
+    end
 
+    return false;
 end
-
-function AdminController:setCookie()
-    --[[ngx.header["Set-Cookie"] = 'pwd=admin123;usename=admin; path=/;Expires=' ..
-    -- ngx.header["Set-Cookie"] = 'pwd=admin123'
-    ngx.cookie_time(ngx.time() + 100)--]]
-
-    local time = ngx.cookie_time(ngx.time() + 200);
-    ngx.header['Set-Cookie'] = {'username=admin;path=/','pwd=admin123;Expires=' .. time}
-    -- helper:setCookie({username = 'admin', pwd = 'admin123'}, nil, 86400);
-    return 'setCookie'
-end
-
-function AdminController:getCookie()
-
-    return ngx.var.http_cookie
-    -- return 'username:' .. ngx.var['cookie_usename'] .. 'pwd:' .. ngx.var['cookie_pwd'];
-end
-
 
 return AdminController
