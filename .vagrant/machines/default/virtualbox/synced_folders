@@ -1,0 +1,1 @@
+{"virtualbox":{"/home/code/lua_vanilla2":{"guestpath":"/home/code/lua_vanilla2","hostpath":"E:/code/lua/lua_vanilla","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"E:/code/lua/lua_vanilla","disabled":false,"__vagrantfile":true}}}
