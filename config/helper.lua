@@ -100,8 +100,31 @@ end;--//end function
 -- 设置cookie
 function helper:setCookie(key, val, time)
 
+  local str = nil
+  if time ~= nil then
+    time = ngx.cookie_time(ngx.time() + time)
+  end
 
+  if type(key) == 'string' then
+    str = key .. '=' .. val
+    if time ~= nil then
+      str = str .. ';Expires=' .. time
+    end
+  elseif type(key) == 'table' then
+    str = {}
+    local tmp = nil
+    for k,v in pairs(key) do
+      tmp = k .. '=' .. v
+      if time ~= nil then
+        tmp = tmp .. ';Expires=' .. time
+      end
+      table.insert(str, tmp)
+    end
+  end
 
+  if str ~= nil then
+    ngx.header['Set-Cookie'] = str;
+  end
 end
 
 function helper:getCookie(key)
